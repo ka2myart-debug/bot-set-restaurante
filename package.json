@@ -1,6 +1,13 @@
 {
+  "name": "bot-set-restaurante",
+  "version": "1.0.0",
+  "description": "Bot de sets do Discord",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "discord.js": "^14.27.0",
-    "dotenv": "^18.0.1"
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
   }
 }
