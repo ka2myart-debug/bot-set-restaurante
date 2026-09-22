@@ -68,6 +68,9 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.isModalSubmit() && interaction.customId === 'modal_solicitar_set') {
+    // Responde imediatamente ao Discord para evitar o erro de "não respondeu a tempo"
+    await interaction.deferReply({ ephemeral: true });
+
     const nomeGame = interaction.fields.getTextInputValue('nome_game');
     const idGame = interaction.fields.getTextInputValue('id_game');
     const novoApelido = `${nomeGame} | ${idGame}`;
@@ -80,18 +83,12 @@ client.on('interactionCreate', async (interaction) => {
       console.log('Não foi possível alterar o apelido:', error);
     }
 
-    // Envia a mensagem pública no canal avisando que foi enviada para a gerência
-    const msgConfirmacao = await interaction.reply({ 
-      content: `✅ <@${interaction.user.id}>, a sua solicitação foi enviada para aprovação da gerência e o seu apelido foi atualizado!`, 
-      fetchReply: true 
+    // Confirma para o usuário de forma privada que deu certo
+    await interaction.editReply({ 
+      content: `✅ A sua solicitação foi enviada para aprovação da gerência e o seu apelido foi atualizado!` 
     });
 
-    // Apaga esta mensagem pública automaticamente após 5 segundos para o canal ficar limpo
-    setTimeout(async () => {
-      await msgConfirmacao.delete().catch(() => {});
-    }, 5000);
-
-    // ID do canal #autorizar-set (Substitua abaixo pelo ID real)
+    // ID do canal #autorizar-set
     const idCanalAutorizar = '1551696595223838770'; 
     const canalAutorizar = await interaction.guild.channels.fetch(idCanalAutorizar).catch(() => null);
 
