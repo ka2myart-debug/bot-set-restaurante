@@ -68,14 +68,12 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.isModalSubmit() && interaction.customId === 'modal_solicitar_set') {
-    // Responde imediatamente ao Discord para evitar o erro de "não respondeu a tempo"
     await interaction.deferReply({ ephemeral: true });
 
     const nomeGame = interaction.fields.getTextInputValue('nome_game');
     const idGame = interaction.fields.getTextInputValue('id_game');
     const novoApelido = `${nomeGame} | ${idGame}`;
 
-    // Tenta alterar o apelido do usuário automaticamente no servidor
     try {
       const membro = await interaction.guild.members.fetch(interaction.user.id);
       await membro.setNickname(novoApelido);
@@ -83,12 +81,10 @@ client.on('interactionCreate', async (interaction) => {
       console.log('Não foi possível alterar o apelido:', error);
     }
 
-    // Confirma para o usuário de forma privada que deu certo
     await interaction.editReply({ 
       content: `✅ A sua solicitação foi enviada para aprovação da gerência e o seu apelido foi atualizado!` 
     });
 
-    // ID do canal #autorizar-set
     const idCanalAutorizar = '1551696595223838770'; 
     const canalAutorizar = await interaction.guild.channels.fetch(idCanalAutorizar).catch(() => null);
 
@@ -125,6 +121,9 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.isButton() && interaction.customId === 'aprovar_set') {
+    // Responde imediatamente para evitar timeout na aprovação
+    await interaction.deferUpdate();
+
     const embedOriginal = interaction.message.embeds[0];
     const embedAprovado = new EmbedBuilder(embedOriginal)
       .setTitle('✅ Solicitação de Set - APROVADA')
@@ -134,7 +133,7 @@ client.on('interactionCreate', async (interaction) => {
         { name: 'Aviso', value: '⚠️ **Lembrete:** O apelido já foi alterado. Por favor, atribua apenas o cargo manualmente ao usuário no servidor!', inline: false }
       );
 
-    await interaction.update({ embeds: [embedAprovado], components: [] });
+    await interaction.message.edit({ embeds: [embedAprovado], components: [] });
   }
 
   if (interaction.isButton() && interaction.customId === 'reprovar_set') {
@@ -155,6 +154,8 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.isModalSubmit() && interaction.customId === 'modal_motivo_reprovar') {
+    await interaction.deferReply({ ephemeral: true });
+
     const motivo = interaction.fields.getTextInputValue('motivo_reprovacao');
     const msgId = solicitacoesPendentes.get(`msg_${interaction.user.id}`);
 
@@ -178,7 +179,7 @@ client.on('interactionCreate', async (interaction) => {
       }
     }
 
-    await interaction.reply({ content: `❌ Solicitação reprovada com sucesso. Motivo: ${motivo}`, ephemeral: true });
+    await interaction.editReply({ content: `❌ Solicitação reprovada com sucesso. Motivo: ${motivo}` });
   }
 });
 
